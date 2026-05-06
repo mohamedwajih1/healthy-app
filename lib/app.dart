@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:healty_app/widgets/follow_listener.dart';
+import 'package:healty_app/services/fcm_service.dart';
+import 'services/ai_insights_service.dart';
+import 'screens/chat/chat_list_screen.dart';
+import 'screens/stats/stats_screen.dart';
 
 // Root application widget
 class MyApp extends StatefulWidget {
@@ -90,6 +94,7 @@ class _MyAppState extends State<MyApp>
     return MaterialApp(
       title: 'حياة صحية',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
 
       locale: const Locale('ar', 'EG'),
       supportedLocales: const [
@@ -103,6 +108,14 @@ class _MyAppState extends State<MyApp>
       ],
 
       theme: themeData(),
+
+      routes: {
+        '/home': (_) => const HomeScreen(),
+        '/chat': (_) => const ChatListScreen(),
+        '/stats': (_) => const StatsScreen(),
+        '/ai_insights': (_) =>
+            const AIInsightsScreen(),
+      },
 
       // Handle auth state changes and route accordingly
       home: StreamBuilder<User?>(
