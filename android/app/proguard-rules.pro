@@ -1,0 +1,6 @@
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-keep class com.google.firebase.common.internal.handler.BiConsumer { *; }
+-keep class com.google.firebase.messaging.FirebaseMessagingService { *; }
+-keep class com.google.firebase.provider.FirebaseInitProvider { *; }
