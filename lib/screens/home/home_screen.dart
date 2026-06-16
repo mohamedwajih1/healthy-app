@@ -4,6 +4,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../features/users/ui/follow_request_listener.dart';
 import '../../services/ai_insights_service.dart';
+import '../../services/notifications_inbox_service.dart';
+import '../notifications/notifications_screen.dart';
 import '../stats/stats_screen.dart';
 import 'tabs/home_tab.dart';
 import 'tabs/profile_tab.dart';
@@ -64,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       centerTitle: true,
       actions: [
+        _buildNotificationsButton(),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
@@ -84,6 +87,66 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(width: 8),
       ],
+    );
+  }
+
+  Widget _buildNotificationsButton() {
+    final userId = context.read<AuthProvider>().user?.uid;
+
+    Widget bell = IconButton(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.notifications_rounded,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+      tooltip: 'الإشعارات',
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+      ),
+    );
+
+    if (userId == null) return bell;
+
+    return StreamBuilder<int>(
+      stream: NotificationsInboxService().unreadCount(userId),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        if (count == 0) return bell;
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            bell,
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  count > 9 ? '9+' : '$count',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

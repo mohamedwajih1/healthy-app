@@ -412,13 +412,16 @@ class NotificationService {
           );
         } else if (frequency == 'weekly') {
           // جدولة أسبوعية - منبه واحد يتكرر كل أسبوع
+          // يستخدم اليوم الذي اختاره المستخدم، وإلا يوم إعداد العادة
+          final weekday =
+              (customDays != null && customDays.isNotEmpty)
+              ? customDays.first
+              : tz.TZDateTime.now(tz.local).weekday;
           await _scheduleWeeklyReminder(
             notificationId: baseNotificationId,
             habitName: habitName,
             reminder: reminder,
-            weekdays: [
-              DateTime.monday,
-            ], // يوم واحد في الأسبوع
+            weekdays: [weekday], // يوم واحد في الأسبوع
           );
         } else if (frequency == 'custom') {
           // جدولة مخصصة - منبه لكل يوم من الأيام المختارة
