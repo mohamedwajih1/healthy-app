@@ -10,6 +10,7 @@ import 'package:healty_app/services/fcm_service.dart';
 import 'services/ai_insights_service.dart';
 import 'screens/chat/chat_list_screen.dart';
 import 'screens/stats/stats_screen.dart';
+import 'screens/notifications/notifications_screen.dart';
 
 // Root application widget
 class MyApp extends StatefulWidget {
@@ -115,6 +116,8 @@ class _MyAppState extends State<MyApp>
         '/stats': (_) => const StatsScreen(),
         '/ai_insights': (_) =>
             const AIInsightsScreen(),
+        '/notifications': (_) =>
+            const NotificationsScreen(),
       },
 
       // Handle auth state changes and route accordingly

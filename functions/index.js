@@ -22,6 +22,32 @@ async function getUser(userId) {
 }
 
 /**
+ * Writes an entry into the in-app notifications inbox.
+ * @param {string} userId Recipient user id.
+ * @param {string} type Notification type (chat | follow | reminder).
+ * @param {string} title Notification title.
+ * @param {string} body Notification body.
+ * @param {!Object<string, string>} data Optional data payload.
+ * @return {Promise<void>}
+ */
+async function writeInbox(userId, type, title, body, data) {
+  if (!userId) return;
+  try {
+    await db.collection("notifications").add({
+      userId: userId,
+      type: type,
+      title: title,
+      body: body,
+      data: data,
+      read: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (err) {
+    logger.error("Error writing inbox notification", err);
+  }
+}
+
+/**
  * Sends a push notification to a single device token.
  * @param {string} token Target FCM registration token.
  * @param {string} title Notification title.
@@ -83,12 +109,16 @@ exports.onNewMessage = onDocumentCreated("messages/{messageId}", async (event) =
 
   const title = sender.name || "رسالة جديدة";
   const body = text.length > 0 ? text : "📷 صورة";
-
-  await sendToToken(recipient.token, title, body, {
+  const data = {
     screen: "chat",
     conversationId: conversationId,
     senderId: senderId,
-  });
+  };
+
+  await Promise.all([
+    sendToToken(recipient.token, title, body, data),
+    writeInbox(recipientId, "chat", title, body, data),
+  ]);
 });
 
 // Sends a push to the target user whenever a new follow request is created.
@@ -111,12 +141,13 @@ exports.onNewFollowRequest = onDocumentCreated(
       ]);
 
       const senderName = sender.name || "أخصائي";
+      const title = "طلب متابعة";
+      const body = `${senderName} يريد متابعتك`;
+      const data = {screen: "home", from: fromId};
 
-      await sendToToken(
-          recipient.token,
-          "طلب متابعة",
-          `${senderName} يريد متابعتك`,
-          {screen: "home", from: fromId},
-      );
+      await Promise.all([
+        sendToToken(recipient.token, title, body, data),
+        writeInbox(toId, "follow", title, body, data),
+      ]);
     },
 );
